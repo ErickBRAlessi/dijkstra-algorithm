@@ -1,18 +1,15 @@
 package src;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class GraphFactory {
 
-    private int linkRate = 0;
+    private float linkRate = 0f;
     private int totalNodes = 0;
 
-    public GraphFactory(int totalNodes, int linkRate){
+    public GraphFactory(int totalNodes, float linkRate){
         this.totalNodes = totalNodes;
-        this.linkRate = linkRate;
+        this.linkRate = Math.max(linkRate, 0f);
     }
 
     public Graph getGraph(){
@@ -31,22 +28,21 @@ public class GraphFactory {
 
 
     private void randomlyLinkNodes(List<Node> nodes) {
-        var numNodes = totalNodes;
-        for(var i = 0; i < numNodes; i++){
-            var node = nodes.get(i);
-            while(node.getNodes().size() < calculateMinimumLinkedNode()){
-                var randomGroup = new HashSet<Node>();
-                var rng= (new Random()).nextInt(numNodes);
-                if(i != rng){
-                    randomGroup.add(nodes.get(rng));
+        var minimumLinkedNode = calculateMinimumLinkedNode();
+        for(var i = 0; i < totalNodes; i++){
+            var nodeToBeLinked = nodes.get(i);
+            while(nodeToBeLinked.getNodes().size() < minimumLinkedNode) {
+                var rng = (new Random()).nextInt(totalNodes);
+                if (i != rng && !nodeToBeLinked.isLinkedTo(nodes.get(rng))) {
+                    nodeToBeLinked.twoHandLinkNode(nodes.get(rng));
                 }
-                randomGroup.forEach(node::twoHandLinkNode);
             }
         }
     }
 
     private int calculateMinimumLinkedNode(){
-        return (totalNodes * linkRate / 100) - 1;
+        var minimumLinkedNodes = (int) ((totalNodes * linkRate / 100f) - 1f);
+        return Math.min(minimumLinkedNodes, (totalNodes - 1));
     }
 
 

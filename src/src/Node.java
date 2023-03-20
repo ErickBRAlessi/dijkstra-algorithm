@@ -29,6 +29,10 @@ public class Node {
         nodes.put(node, edge);
     }
 
+    public boolean isLinkedTo(Node node){
+        return this.getNodes().containsKey(node);
+    }
+
 
     public String getName() {
         return name;

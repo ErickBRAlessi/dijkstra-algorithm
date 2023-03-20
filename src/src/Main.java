@@ -4,11 +4,12 @@ public class Main {
 
     public static void main(String[] args) {
 
-        GraphFactory graphFactory = new GraphFactory(10000, 1);
-        var init = System.currentTimeMillis();
+        GraphFactory graphFactory = new GraphFactory(1000, 0.5f);
         var graph = graphFactory.getGraph();
+        System.out.println("Graph Created");
+        var init = System.currentTimeMillis();
         //graph.printGraph();
-        graph.getShortestPath(graph.getNodes().get(0), graph.getNodes().get(9999));
+        graph.printAllShortestPath(graph.getNodes().get(0));
         System.out.println("Tempo total :" + (System.currentTimeMillis() - init)/1000 );
         //graph.printGraph();
 

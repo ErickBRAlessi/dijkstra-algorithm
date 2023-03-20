@@ -24,23 +24,44 @@ public class Graph {
     }
 
     public int getShortestPath(Node source, Node destination) {
-        return dijkstraAlgorithm(source, destination);
-    }
-
-    private int dijkstraAlgorithm(Node source, Node destination) {
-        dijkstraGraph = initializeDistance(source);
+        generateDijkstraGraph(source);
         var dijkstraSource = findNode(source);
         var dijkstraDestination = findNode(destination);
-
-        exploreGraph(dijkstraSource);
 
         printResult(dijkstraSource, dijkstraDestination);
 
         return dijkstraDestination.getDistance();
     }
 
-    private void exploreGraph(DijkstraNode dijkstraSource) {
-        var dijkstraNext = dijkstraSource;
+    public void printAllShortestPath(Node source) {
+        generateDijkstraGraph(source);
+        var dijkstraSource = findNode(source);
+        nodes.forEach(n -> {
+            var dijkstraDestination = findNode(n);
+            if(dijkstraSource != dijkstraDestination) {
+                printResult(dijkstraSource, dijkstraDestination);
+            }
+        });
+    }
+
+    private void generateDijkstraGraph(Node source) {
+        dijkstraGraph = initializeDistance(source);
+        exploreGraph(source);
+    }
+
+    private List<DijkstraNode> initializeDistance(Node source) {
+        return nodes.stream().map(node -> {
+            if (node != source) {
+                return new DijkstraNode(node, -1);
+            }
+            var dijkstraSource = new DijkstraNode(node, 0);
+            dijkstraSource.setExplored(true);
+            return dijkstraSource;
+        }).toList();
+    }
+
+    private void exploreGraph(Node source) {
+        var dijkstraNext = findNode(source);
 
         while (true) {
             updateDistance(dijkstraNext);
@@ -71,28 +92,16 @@ public class Graph {
         return !dijkstraNode.isExplored() && ((edge.getDistance() + dijkstraSource.getDistance()) < dijkstraNode.getDistance() || dijkstraNode.getDistance() == -1);
     }
 
-    private List<DijkstraNode> initializeDistance(Node source) {
-        return nodes.stream().map(node -> {
-            if (node != source) {
-                return new DijkstraNode(node, -1);
-            }
-            var dijkstraSource = new DijkstraNode(node, 0);
-            dijkstraSource.setExplored(true);
-            return dijkstraSource;
-        }).toList();
-    }
-
     private DijkstraNode findNode(Node node) {
         return dijkstraGraph.stream().filter(dn -> dn.getNode() == node).findFirst().orElseThrow();
     }
 
     private void printResult(DijkstraNode dijkstraSource, DijkstraNode dijkstraDestination) {
         if (dijkstraDestination.getDistance() != -1) {
-            System.out.println("The smallest path between source and destination is :" + dijkstraDestination.getDistance());
             StringBuffer buffer = getSmallestPathDescription(dijkstraSource, dijkstraDestination);
-            System.out.println(buffer);
+            System.out.println(dijkstraSource.getNode().getName() + " and " + dijkstraDestination.getNode().getName() + ": distance:"  + dijkstraDestination.getDistance() + " path:" + buffer);
         } else {
-            System.out.println("There is no path from source to destination");
+            System.out.println(dijkstraSource.getNode().getName() + " and " + dijkstraDestination.getNode().getName() + ": there is no path" );
         }
     }
 
@@ -100,6 +109,7 @@ public class Graph {
         var backwardsPath = dijkstraDestination;
         Stack<String> bestPath = new Stack<>();
         do {
+            //TODO: it crashes trying to printing source and source distance
             bestPath.push("(" + backwardsPath.getPreviousDijkstraNode().getNode().getName() + ") - " + backwardsPath.getPreviousDijkstraNode().getNode().getNodes().get(backwardsPath.getNode()).getDistance() + " - ");
             backwardsPath = backwardsPath.getPreviousDijkstraNode();
         } while (backwardsPath != dijkstraSource);
